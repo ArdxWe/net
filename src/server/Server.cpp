@@ -47,7 +47,7 @@ void Server::start() {
   listen(listen_fd, 5);
 
   sockaddr_in_t client;
-  socklen_t len;
+  socklen_t len = sizeof(client);
   connect_fd_ = accept(listen_fd, (sockaddr *) &client, &len);
 
   stringstream stream = hello(client);
@@ -57,16 +57,17 @@ void Server::start() {
   loop();
 }
 
-stringstream Server::hello(const sockaddr_in &client) {
-  vector<char> addr(0x100);
+stringstream Server::hello(const sockaddr_in_t &client) {
+  vector<char> addr(0x100, 0);
   inet_ntop(AF_INET, &client.sin_addr, addr.data(), addr.size());
 
   stringstream stream;
   stream << "address: ";
-  stream.write(addr.data(), addr.size());
+  stream << addr.data();
   stream << endl;
 
-  stream << "port   : " << client.sin_port << endl;
+  uint16_t port = ntohs(client.sin_port);
+  stream << "port   : " << port << endl;
 
   stream << "Welcome to my machine :)" << endl;
   auto time = std::chrono::system_clock::to_time_t(
