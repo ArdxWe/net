@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <vector>
 
+using std::cout;
 using std::endl;
 using std::put_time;
 using std::runtime_error;
@@ -106,8 +107,15 @@ void Server::send(std::stringstream &stream) const {
   string res = stream.str();
   string head = to_string(res.size()) + '\0';
 
-  write(connect_fd_, head.data(), head.size());
-  write(connect_fd_, res.c_str(), res.size());
+  int len = 0;
+  len = write(connect_fd_, head.data(), head.size());
+  if (len != head.size() || len == -1) {
+    cout << "write error" << endl;
+  }
+  len = write(connect_fd_, res.c_str(), res.size());
+  if (len != res.size() || len == -1) {
+    cout << "write error" << endl;
+  }
 }
 
 bool Server::get_full_package(std::stringstream &stream) {
